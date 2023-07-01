@@ -1,0 +1,47 @@
+redis:
+  host: www.youlai.tech
+  port: 6379
+  password: 123456
+  
+mysql:
+  host: www.youlai.tech
+  port: 3306
+  username: youlai
+  password: 123456
+
+rabbitmq:
+  host: b.youlai.tech
+  port: 5672
+  username: guest
+  password: guest
+
+# Knife4j的认证路径
+knife4j:
+  password_token_url: http://localhost:9999/youlai-auth/oauth/token
+
+# MinIO 分布式文件系统
+minio:
+  endpoint: http://www.youlai.tech:9000
+  access-key: minioadmin
+  secret-key: youlaitech
+  bucket-name: default
+  # 自定义域名(非必须)，Nginx配置反向代理转发文件路径
+  custom-domain: https://oss.youlai.tech
+  
+# Seata的注册和配置中心
+seata:
+  nacos: 
+    server-addr: http://localhost:8848
+  
+# Sentinel
+sentinel:
+  dashboard: localhost:8858
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:9999/youlai-auth/rsa/publicKey
+
+

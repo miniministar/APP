@@ -3,6 +3,7 @@
   "version": "2.1.0",
   "scripts": {
     "dev": "vite serve --mode development",
+    "prod": "vite serve --mode production",
     "build:prod": "vue-tsc --noEmit && vite build --mode production",
     "serve": "vite preview",
     "lint": "eslint src/**/*.{ts,js,vue} --fix",
@@ -19,7 +20,7 @@
     "better-scroll": "^2.4.2",
     "default-passive-events": "^2.0.0",
     "echarts": "^5.2.2",
-    "element-plus": "^2.2.17",
+    "element-plus": "^2.2.15",
     "js-cookie": "^3.0.1",
     "nprogress": "^0.2.0",
     "path-browserify": "^1.0.1",

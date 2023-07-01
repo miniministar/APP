@@ -1,0 +1,101 @@
+spring:
+  redis:
+    timeout: PT30S
+    database: 0
+    host: ${redis.host}
+    port: ${redis.port}
+    password: ${redis.password}
+    lettuce:
+      pool:
+        # 连接池最小空闲连接数
+        min-idle: 1
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 启用服务发现
+          lower-case-service-id: true
+      routes:
+        - id: 认证中心
+          uri: lb://youlai-auth
+          predicates:
+            - Path=/youlai-auth/**
+          filters:
+            - StripPrefix=1
+        - id: 系统服务
+          uri: lb://youlai-system
+          predicates:
+            - Path=/youlai-system/**
+          filters:
+            - StripPrefix=1
+            - TokenRelay
+        - id: 订单服务
+          uri: lb://mall-oms
+          predicates:
+            - Path=/mall-oms/**
+          filters:
+            - StripPrefix=1
+            - TokenRelay
+        - id: 商品服务
+          uri: lb://mall-pms
+          predicates:
+            - Path=/mall-pms/**
+          filters:
+            - StripPrefix=1
+            - TokenRelay
+        - id: 会员服务
+          uri: lb://mall-ums
+          predicates:
+            - Path=/mall-ums/**
+          filters:
+            - StripPrefix=1
+            - TokenRelay
+        - id: 营销服务
+          uri: lb://mall-sms
+          predicates:
+            - Path=/mall-sms/**
+          filters:
+            - StripPrefix=1
+            - TokenRelay
+        - id: 实验室
+          uri: lb://laboratory
+          predicates:
+            - Path=/laboratory/**
+          filters:
+            - StripPrefix=1
+            - TokenRelay
+    sentinel:
+      enabled: true
+      eager: true
+      transport:
+        dashboard: ${sentinel.dashboard}
+        port: 8719 
+      datasource:
+        # 网关限流规则，gw-flow为key，随便定义
+        gw-flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-gw-flow-rules
+            groupId: SENTINEL_GROUP
+            rule-type: gw-flow
+        # 自定义API分组，gw-api-group为key，随便定义
+        gw-api-group:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-gw-api-group-rules
+            groupId: SENTINEL_GROUP
+            rule-type: gw-api-group
+# Feign 配置
+feign:
+  httpclient:
+    enabled: true
+  okhttp:
+    enabled: false
+  sentinel:  # 开启feign对sentinel的支持
+    enabled: false 
+
+# 禁止访问路径
+security:
+  forbiddenURIs:
+      # 获取用户认证信息
+      - /youlai-system/api/v1/users/*/authinfo

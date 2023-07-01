@@ -27,7 +27,7 @@ function jumpAPP(app: string) {
     <!-- 数据 -->
     <el-row :gutter="40" class="card-panel__col">
       <el-col :xs="24" :sm="12" :lg="6" class="card-panel__col">
-        <el-link @click="jumpAPP('http://localhost:9528')">
+        <el-link @click="jumpAPP('http://10.0.50.10:32201')">
           <el-card>
             <div class="app-link">
               <svg-icon icon-class="message" class-name="card-panel-icon" />
@@ -37,7 +37,7 @@ function jumpAPP(app: string) {
         </el-link>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6" class="card-panel__col">
-        <el-link @click="jumpAPP('http://localhost:9529')">
+        <el-link @click="jumpAPP('http://10.0.50.10:32202')">
           <el-card>
             <div class="app-link">
               <svg-icon icon-class="message" class-name="card-panel-icon" />
