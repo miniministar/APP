@@ -54,7 +54,7 @@ const props = defineProps({
 
 const goodsInfo: any = computed({
   get: () => props.modelValue,
-  set: (value) => {
+  set: (value: any) => {
     emit('update:modelValue', value);
   },
 });

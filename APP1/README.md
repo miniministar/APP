@@ -87,7 +87,7 @@
 
 1. npm install
 2. npm run dev
-3. 浏览器访问 http://localhost:9527
+3. 浏览器访问 http://10.0.50.10:32200
 
 
 ### 项目部署

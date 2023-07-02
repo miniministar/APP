@@ -6,7 +6,6 @@
     "build:prod": "vue-tsc --noEmit && vite build --mode production",
     "serve": "vite preview",
     "lint": "eslint src/**/*.{ts,js,vue} --fix",
-    "prepare": "husky install",
     "prettier": "prettier --write ."
   },
   "dependencies": {
@@ -46,7 +45,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.6.0",
     "fast-glob": "^3.2.11",
-    "husky": "^7.0.4",
     "prettier": "^2.6.2",
     "sass": "^1.53.0",
     "typescript": "^4.8.3",

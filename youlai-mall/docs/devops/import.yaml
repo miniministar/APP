@@ -804,7 +804,7 @@ metadata:
   name: youlai-config
   namespace: spring-blade
 data:
-  NACOS_SERVER_ADDR: 'nacos-0.nacos:8848'
+  NACOS_SERVER_ADDR: 'nacos.spring-blade:8848'
   PROFILE: k8s
   SENTINEL_DASHBOARD_ADDR: 'sentinel-0.sentinel:8858'
 

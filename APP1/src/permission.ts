@@ -11,8 +11,8 @@ router.beforeEach(async (to, from, next) => {
   NProgress.start();
   const { user, permission } = useStore();
   let hasToken = user.token;
-  // http://localhost:9527/#/login?redirect=/401
-  let uri = encodeURIComponent(`http://localhost:9528/#/?redirect=${to.path}`);
+  // http://10.0.50.10:32200/#/login?redirect=/401
+  let uri = encodeURIComponent(`http://10.0.50.10:32201/#/?redirect=${to.path}`);
   const query = to.query;
   if(query && query.token ) {
     hasToken =  <string>query.token;
@@ -27,7 +27,7 @@ router.beforeEach(async (to, from, next) => {
   if (hasToken) {
     // 登录成功，跳转到首页
     if (to.path === '/login') {
-      window.open(`http://localhost:9527/#/login?redirect=${uri}`, '_self');
+      window.open(`http://10.0.50.10:32200/#/login?redirect=${uri}`, '_self');
       NProgress.done();
     } else {
       const hasGetUserInfo = user.roles.length > 0;
@@ -49,7 +49,7 @@ router.beforeEach(async (to, from, next) => {
         } catch (error) {
           // 移除 token 并跳转登录页
           await user.resetToken();
-          window.open(`http://localhost:9527/#/login?redirect=${uri}`, '_self');
+          window.open(`http://10.0.50.10:32200/#/login?redirect=${uri}`, '_self');
           NProgress.done();
         }
       }
@@ -59,7 +59,7 @@ router.beforeEach(async (to, from, next) => {
     if (whiteList.indexOf(to.path) !== -1) {
       next();
     } else {
-      window.open(`http://localhost:9527/#/login?redirect=${uri}`, '_self');
+      window.open(`http://10.0.50.10:32200/#/login?redirect=${uri}`, '_self');
       NProgress.done();
     }
   }

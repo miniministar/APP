@@ -10,7 +10,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: nacos-0.nacos:8848   # 使用k8s无头服务
+        server-addr: nacos.spring-blade:8848   # 使用k8s无头服务
         namespace: youlai-namespace-id
       config:
         server-addr: ${spring.cloud.nacos.discovery.server-addr}

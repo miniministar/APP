@@ -11,8 +11,8 @@ spring:
     nacos:
       # 注册中心
       discovery:
-        server-addr: http://10.233.219.91:8848   # 使用k8s无头服务
-#        server-addr: nacos-0.nacos:8848   # 使用k8s无头服务
+#        server-addr: http://10.233.219.91:8848   # 使用k8s无头服务
+        server-addr: nacos.spring-blade:8848   # 使用k8s无头服务
         namespace: youlai-namespace-id
       # 配置中心
       config:
