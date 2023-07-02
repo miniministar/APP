@@ -1,0 +1,126 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s.kuboard.cn/layer: svc
+    k8s.kuboard.cn/name: system-boot
+    app: system-boot
+    service: system-boot
+  name: system-boot
+  namespace: spring-blade
+spec:
+  clusterIP: None
+  clusterIPs:
+    - None
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    k8s.kuboard.cn/layer: svc
+    k8s.kuboard.cn/name: system-boot
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: system-boot-route
+  namespace: spring-blade
+spec:
+  #用于定义流量被发送到的目标主机（这里为部署在k8s中的micro-api服务）
+  hosts:
+    - system-boot.spring-blade.svc.cluster.local
+  #将VirtualService绑定到Istio网关,通过网关来暴露路由目标
+  gateways:
+    - micro-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /youlai-auth
+    route:
+    #设置新版本（V2）版本的流量占比为30%
+    - destination:
+        host: system-boot.spring-blade.svc.cluster.local
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: system-boot
+  namespace: spring-blade
+  labels:
+    k8s.kuboard.cn/layer: svc
+    k8s.kuboard.cn/name: system-boot
+    app: system-boot
+    version: v1
+  annotations:
+    deployment.kubernetes.io/revision: '1'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s.kuboard.cn/layer: svc
+      k8s.kuboard.cn/name: system-boot
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        k8s.kuboard.cn/layer: svc
+        k8s.kuboard.cn/name: system-boot
+        app: system-boot
+        version: v1
+        sidecar.istio.io/inject: "true"
+    spec:
+      #设置的阿里云私有镜像仓库登陆信息的secret(对应2.1.2的设置)
+      imagePullSecrets:
+        - name: sanywind
+      containers:
+        - name: system-boot
+          image: 'harbor.sanywind.net/cloud/wukong_dev/system-boot:2.2.0'
+          args:
+            - '--spring.profiles.active=${PROFILE}'
+            - '--spring.cloud.nacos.config.server-addr=${NACOS_SERVER_ADDR}'
+            - '--spring.cloud.nacos.discovery.server-addr=${NACOS_SERVER_ADDR}'
+            - >-
+              --spring.cloud.sentinel.transport.dashboard=${SENTINEL_DASHBOARD_ADDR}
+            - '--server.port=80'
+          ports:
+            - name: server
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: youlai-config
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              memory: 200Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

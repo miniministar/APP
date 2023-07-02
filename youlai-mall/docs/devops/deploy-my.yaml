@@ -48,7 +48,7 @@ spec:
         - name: ${docker_hub_id}  #提前在项目下配置访问阿里云或harbor的账号密码
       containers:
         - image: $remote_tag
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           name: ${module_name_suffix}
           ports:
             - name: http-${service_port}

@@ -1,0 +1,97 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    k8s.kuboard.cn/layer: web
+    k8s.kuboard.cn/name: system-web
+    app: system-web
+    version: v1
+  name: system-web
+  namespace: spring-blade
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s.kuboard.cn/layer: web
+      k8s.kuboard.cn/name: system-web
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: '2023-07-02T14:48:34+08:00'
+        sidecar.istio.io/inject: 'true'
+      creationTimestamp: null
+      labels:
+        app: system-web
+        k8s.kuboard.cn/layer: web
+        k8s.kuboard.cn/name: system-web
+        version: v1
+    spec:
+      containers:
+        - image: 'harbor.sanywind.net/cloud/wukong_dev/system-web:1.0'
+          imagePullPolicy: Always
+          name: system-web
+          ports:
+            - containerPort: 80
+              name: web
+              protocol: TCP
+          resources:
+            limits:
+              memory: 1Gi
+            requests:
+              memory: 100Mi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: sanywind
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s.kuboard.cn/layer: web
+    k8s.kuboard.cn/name: system-web
+  name: system-web
+  namespace: spring-blade
+spec:
+  clusterIP: 10.233.137.245
+  clusterIPs:
+    - 10.233.137.245
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: web
+      nodePort: 32200
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    k8s.kuboard.cn/layer: web
+    k8s.kuboard.cn/name: system-web
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  type: NodePort
+status:
+  loadBalancer: {}
+

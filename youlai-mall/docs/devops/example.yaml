@@ -1,0 +1,212 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: micro-api
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 19090
+      targetPort: 9090
+  selector:
+    app: micro-api
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: micro-api
+spec:
+  selector:
+    matchLabels:
+      app: micro-api
+  replicas: 1
+  #设置滚动升级策略
+  #Kubernetes在等待设置的时间后才开始进行升级，例如5秒
+  minReadySeconds: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      #升级过程中最多可以比原先设置多出的Pod数量
+      maxSurge: 1
+      #升级过程中Deployment控制器最多可以删除多少个旧Pod，主要用于提供缓冲时间
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: micro-api
+    spec:
+      #设置的阿里云私有镜像仓库登陆信息的secret(对应2.1.2的设置)
+      imagePullSecrets:
+        - name: sanywind
+      containers:
+        - name: micro-api
+          image: harbor.sanywind.net/cloud/wukong_dev/micro-api:1.0-SNAPSHOT
+          imagePullPolicy: Always
+          tty: true
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 19090
+
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: micro-api-route
+spec:
+  #用于定义流量被发送到的目标主机（这里为部署在k8s中的micro-api服务）
+  hosts:
+    - micro-api.default.svc.cluster.local
+  #将VirtualService绑定到Istio网关,通过网关来暴露路由目标
+  gateways:
+    - micro-gateway
+  http:
+    - route:
+        #设置旧版本（V1）版本的流量占比为70%
+        - destination:
+            host: micro-api.default.svc.cluster.local
+            subset: v1
+          #通过权重值来设置流量占比
+          weight: 0
+        #设置新版本（V2）版本的流量占比为30%
+        - destination:
+            host: micro-api.default.svc.cluster.local
+            subset: v2
+          weight: 100
+
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: micro-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: micro-order
+  labels:
+    app: micro-order
+    service: micro-order
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      #此处设置80端口的原因在于改造的Mock FeignClient代码默认是基于80端口进行服务调用
+      port: 80
+      targetPort: 9091
+  selector:
+    app: micro-order
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: micro-order-v1
+  labels:
+    app: micro-order
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: micro-order
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: micro-order
+        version: v1
+    spec:
+      #设置的阿里云私有镜像仓库登陆信息的secret(对应2.1.2的设置)
+      imagePullSecrets:
+        - name: sanywind
+      containers:
+        - name: micro-order
+          image: harbor.sanywind.net/cloud/wukong_dev/micro-order:1.0-SNAPSHOT
+          imagePullPolicy: Always
+          tty: true
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 19091
+          #环境参数设置(设置微服务返回gRPC服务端的地址+端口)
+          env:
+            - name: GRPC_SERVER_HOST
+              value: micro-pay
+            - name: GRPC_SERVER_PORT
+              value: "18888"
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: micro-pay
+  labels:
+    app: micro-pay
+    service: micro-pay
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      #容器暴露端口
+      port: 19092
+      #目标应用端口
+      targetPort: 9092
+    #设置gRPC端口
+    - name: grpc
+      port: 18888
+      targetPort: 18888
+  selector:
+    app: micro-pay
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: micro-pay-v1
+  labels:
+    app: micro-pay
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: micro-pay
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: micro-pay
+        version: v1
+    spec:
+      #设置的阿里云私有镜像仓库登陆信息的secret(对应2.1.2的设置)
+      imagePullSecrets:
+        - name: sanywind
+      containers:
+        - name: micro-pay
+          image: harbor.sanywind.net/cloud/wukong_dev/micro-pay:1.0-SNAPSHOT
+          imagePullPolicy: Always
+          tty: true
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 19092
+            #指定服务gRPC端口
+            - name: grpc
+              protocol: TCP
+              containerPort: 18888

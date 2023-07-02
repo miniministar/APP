@@ -1,0 +1,67 @@
+kind: Gateway
+apiVersion: networking.istio.io/v1beta1
+metadata:
+  name: micro-gateway
+  namespace: spring-blade
+spec:
+  servers:
+    - port:
+        number: 80
+        protocol: HTTP
+        name: http
+      hosts:
+        - '*'
+  selector:
+    istio: ingressgateway
+status: {}
+#
+#
+#routes:
+#  - id: 认证中心
+#    uri: lb://youlai-auth
+#    predicates:
+#      - Path=/youlai-auth/**
+#    filters:
+#      - StripPrefix=1
+#  - id: 系统服务
+#    uri: lb://youlai-system
+#    predicates:
+#      - Path=/youlai-system/**
+#    filters:
+#      - StripPrefix=1
+#      - TokenRelay
+#  - id: 订单服务
+#    uri: lb://mall-oms
+#    predicates:
+#      - Path=/mall-oms/**
+#    filters:
+#      - StripPrefix=1
+#      - TokenRelay
+#  - id: 商品服务
+#    uri: lb://mall-pms
+#    predicates:
+#      - Path=/mall-pms/**
+#    filters:
+#      - StripPrefix=1
+#      - TokenRelay
+#  - id: 会员服务
+#    uri: lb://mall-ums
+#    predicates:
+#      - Path=/mall-ums/**
+#    filters:
+#      - StripPrefix=1
+#      - TokenRelay
+#  - id: 营销服务
+#    uri: lb://mall-sms
+#    predicates:
+#      - Path=/mall-sms/**
+#    filters:
+#      - StripPrefix=1
+#      - TokenRelay
+#  - id: 实验室
+#    uri: lb://laboratory
+#    predicates:
+#      - Path=/laboratory/**
+#    filters:
+#      - StripPrefix=1
+#      - TokenRelay
